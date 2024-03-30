@@ -1,0 +1,132 @@
+import pygame
+import sys
+from pygame_gui import UIManager
+from pygame_gui.elements import UITextEntryLine, UIButton
+
+# Initialize pygame
+pygame.init()
+
+# Set the initial width and height of the screen
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+pygame.display.set_caption("Intersecting Lines")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (150, 150, 150)
+RED = (255, 0, 0)
+
+# Font
+font = pygame.font.Font(None, 32)
+
+# Create a GUI manager
+manager = UIManager((width, height))
+
+# Create input boxes
+axis_label = font.render("Axis Angle:", True, BLACK)
+axis_input = UITextEntryLine(relative_rect=pygame.Rect((20, height - 40), (150, 30)),
+                             manager=manager)
+dimension_label = font.render("Dimensions:", True, BLACK)
+dimension_input = UITextEntryLine(relative_rect=pygame.Rect((axis_input.rect.right + 20, height - 40), (150, 30)),
+                                  manager=manager)
+onto_label = font.render("Monto:", True, BLACK)
+onto_input1 = UITextEntryLine(relative_rect=pygame.Rect((dimension_input.rect.right + 20, height - 40), (70, 30)),
+                              manager=manager)
+onto_input2 = UITextEntryLine(relative_rect=pygame.Rect((onto_input1.rect.right + 20, height - 40), (70, 30)),
+                              manager=manager)
+
+# Function to update UI elements positions and sizes
+def update_ui_elements():
+
+  global width, height
+
+  # Get new label widths
+  axis_label_width = axis_label.get_width()  
+  dimension_label_width = dimension_label.get_width() 
+  onto_label_width = onto_label.get_width()
+
+  # Axis input position
+  axis_input.rect.topleft = (20, height-40)
+
+  # Dimension input position 
+  dimension_input.rect.topleft = (
+     axis_input.rect.right + axis_label_width + 20,  
+     height - 40
+  )
+
+  # Onto input 1 position
+  onto_input1.rect.topleft = (  
+     dimension_input.rect.right + onto_label_width + 20,
+     height - 40
+  )
+
+  # Onto input 2 position
+  onto_input2.rect.topleft = (
+     onto_input1.rect.right + 20,  
+     height - 40
+  )
+
+  # Recalculate bar width
+  bar_width = width
+
+  # Reposition button
+  go_button.rect.right = bar_width - 10
+  go_button.rect.bottom = height - 10
+
+
+
+# Create a button named "Po"
+go_button = UIButton(relative_rect=pygame.Rect((width - 110, height - 40), (100, 30)),
+                     text='Go!',
+                     manager=manager,
+                     object_id='go_button')
+
+# Main loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.VIDEORESIZE:
+            # Resize the screen and UI manager
+            width, height = event.size
+            screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+            manager.set_window_resolution(event.size)
+            update_ui_elements()
+
+        manager.process_events(event)
+
+    manager.update(pygame.time.Clock().tick(30) / 1000.0)
+
+    screen.fill(WHITE)
+
+    # Draw bottom grey bar
+    pygame.draw.rect(screen, GRAY, (0, height - 50, width, 50))
+
+    # Render text labels
+    screen.blit(axis_label, (20, height - 40))
+    screen.blit(dimension_label, (axis_input.rect.right + 20, height - 40))
+    screen.blit(onto_label, (dimension_input.rect.right + 20, height - 40))
+
+    # Draw UI components
+    manager.draw_ui(screen)
+
+    # Apply modifications to Po button
+    go_button.set_dimensions((100, 30))
+    go_button.border_width = 0
+    go_button.hovered_border_width = 0
+    go_button.text_colour = WHITE
+    go_button.colours['hovered_text'] = WHITE
+    go_button.colours['normal_bg'] = RED
+
+    # Set edit text input properties
+    for element in [axis_input, dimension_input, onto_input1, onto_input2]:
+        element.text_colour = BLACK
+        element.active_colour = WHITE
+        element.inactive_colour = WHITE
+
+    pygame.display.flip()
+
+pygame.quit()
+sys.exit()
